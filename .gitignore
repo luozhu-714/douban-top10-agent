@@ -1,0 +1,24 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ---- 虚拟环境 ----
+.venv/
+venv/
+env/
+
+# ---- 密钥 / 环境变量（不要把 API Key 提交上去）----
+.env
+.env.*
+
+# ---- 爬取数据与生成产物（可重新生成，不入库）----
+data/
+output/
+
+# ---- IDE / 系统文件 ----
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,10 @@
+# 核心依赖（爬虫 + 解析 + 存储展示）
+requests>=2.28.0
+beautifulsoup4>=4.11.0
+tabulate>=0.9.0
+
+# Agent 分析模块（agent_analyzer.py，基于 LangChain/LangGraph 的 ReAct Agent）
+# 注意：create_react_agent 在 langgraph 2.0 被移除，故锁定 <2.0
+langgraph>=0.2.0,<2.0
+langchain-anthropic>=0.2.0
+langchain-openai>=0.2.0
