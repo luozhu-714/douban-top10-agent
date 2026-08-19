@@ -20,7 +20,7 @@ OUTPUT_DIR = "output"
 # 字段顺序：决定 CSV 的列顺序，也保证 JSON 里字段整齐
 FIELDS = [
     "rank", "title", "original_title", "aliases", "directors", "actors",
-    "rating", "rating_count", "year", "country", "genre", "quote", "detail_url",
+    "rating", "rating_count", "year", "country", "genre", "quote", "poster", "detail_url",
 ]
 
 

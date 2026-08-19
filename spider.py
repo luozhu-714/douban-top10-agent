@@ -17,7 +17,7 @@ spider.py —— 豆瓣电影 Top 250 爬虫模块（合并版）
     genre          类型
     quote          一句经典短评 / 简介
     rank           排名
-    poster         海报图 URL（豆瓣图床，前端用 referrerpolicy="no-referrer" 展示）
+    poster         海报图 URL（豆瓣图床，前端经 /api/poster 代理展示以绕过防盗链）
     detail_url     详情页链接
 
 反爬策略：

@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import * as echarts from 'echarts'
 import { getReviews } from '../api'
@@ -37,6 +37,7 @@ const route = useRoute()
 const entry = ref(null)
 const loading = ref(true)
 const starChartRef = ref(null)
+let starChart = null
 
 onMounted(async () => {
   try {
@@ -57,8 +58,8 @@ function renderStarChart() {
   entry.value.reviews.forEach(r => {
     if (dist[r.rating] != null) dist[r.rating]++
   })
-  const chart = echarts.init(starChartRef.value)
-  chart.setOption({
+  starChart = echarts.init(starChartRef.value)
+  starChart.setOption({
     title: { text: '星级分布', left: 'center' },
     tooltip: {},
     xAxis: { type: 'category', data: Object.keys(dist).map(k => k + ' 星') },
@@ -66,4 +67,8 @@ function renderStarChart() {
     series: [{ type: 'bar', data: Object.values(dist), itemStyle: { color: '#f5a623' } }],
   })
 }
+
+onBeforeUnmount(() => {
+  if (starChart) starChart.dispose()
+})
 </script>

@@ -195,6 +195,7 @@ $env:LLM_MODEL      = "qwen2.5"
 | `country` | 制片国家 |
 | `genre` | 类型 |
 | `quote` | 一句经典短评 / 简介（榜单页自带） |
+| `poster` | 海报图 URL（豆瓣图床） |
 | `detail_url` | 详情页链接 |
 
 **短评字段（`data/top10_reviews.json`）：**

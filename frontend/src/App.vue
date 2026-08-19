@@ -31,8 +31,13 @@ let timer = null
 async function runAll() {
   running.value = true
   jobMsg.value = '启动中…'
-  await runPipeline(true)
-  poll()
+  try {
+    await runPipeline(true)
+    poll()
+  } catch (e) {
+    running.value = false
+    jobMsg.value = '启动失败，请确认后端已启动'
+  }
 }
 
 function poll() {

@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import * as echarts from 'echarts'
 import { getStats } from '../api'
 
@@ -34,6 +34,8 @@ const hasData = ref(false)
 const loading = ref(true)
 const ratingChartRef = ref(null)
 const starChartRef = ref(null)
+let ratingChart = null
+let starChart = null
 
 onMounted(async () => {
   try {
@@ -51,8 +53,8 @@ onMounted(async () => {
 })
 
 function renderRatingChart(d) {
-  const chart = echarts.init(ratingChartRef.value)
-  chart.setOption({
+  ratingChart = echarts.init(ratingChartRef.value)
+  ratingChart.setOption({
     title: { text: 'Top10 评分', left: 'center' },
     tooltip: {},
     grid: { left: 140, right: 40, top: 40, bottom: 30 },
@@ -74,8 +76,8 @@ function renderRatingChart(d) {
 }
 
 function renderStarChart(d) {
-  const chart = echarts.init(starChartRef.value)
-  chart.setOption({
+  starChart = echarts.init(starChartRef.value)
+  starChart.setOption({
     title: { text: '短评星级分布', left: 'center' },
     tooltip: { trigger: 'item', formatter: '{b}: {c} ({d}%)' },
     series: [
@@ -88,4 +90,9 @@ function renderStarChart(d) {
     ],
   })
 }
+
+onBeforeUnmount(() => {
+  if (ratingChart) ratingChart.dispose()
+  if (starChart) starChart.dispose()
+})
 </script>
