@@ -29,6 +29,7 @@
 - **存储**：榜单存 JSON + CSV（Excel 用 `utf-8-sig`）；短评存为 JSON；文件名带时间戳。
 - **Agent 分析**：LangChain / LangGraph `create_react_agent` + `load_review_data` 工具，让 LLM 自主调用工具读取短评，整合用户口碑输出每部电影的综合评价；支持 Anthropic / OpenAI / DeepSeek / 本地 OpenAI 兼容接口。
 - **报告**：输出 Markdown（每部电影一段综合评价 + 总体口碑）。
+- **Web 前端**：FastAPI 后端 + Vue 3 前端，浏览榜单 / 短评 / 报告、图表可视化（ECharts）、网页一键触发流水线重跑。
 
 ## 目录结构
 
@@ -37,13 +38,16 @@ douban_top10/
 ├── spider.py               # 爬虫：抓榜单 + 抓短评（移动端 API）
 ├── crawl_reviews.py        # 单独抓短评的入口（可选）
 ├── agent_analyzer.py       # ReAct Agent：整合用户短评 → 综合评价
-├── main.py                 # 总入口：爬榜单 → 存 → 爬短评 → Agent 分析
+├── pipeline.py             # 可复用流水线（CLI 和 Web 共用）
+├── main.py                 # CLI 总入口：调 pipeline 跑全流程
+├── app.py                  # FastAPI 后端：数据接口 + 触发流水线
 ├── requirements.txt        # 依赖
-├── .gitignore              # 忽略 data/、output/、密钥等
+├── .gitignore              # 忽略 data/、output/、node_modules 等
 ├── storage/
 │   ├── file_storage.py     # 榜单 JSON / CSV 存取
 │   ├── data_storage.py     # 数据清洗 + JSONL + 短评存取
 │   └── __init__.py
+├── frontend/               # Vue 3 前端（Vite + ECharts）
 ├── data/                   # 运行后自动生成（不入库）
 └── output/                 # 运行后自动生成（不入库）
 ```
@@ -51,6 +55,7 @@ douban_top10/
 ## 环境准备
 
 - Python 3.10+（本项目在 3.13 上验证）。
+- 使用 Web 前端还需 Node.js 18+（本项目在 Node 24 上验证）。
 - Windows 建议用 `py -3.13` 启动器——裸 `python` 可能指向另一套没有依赖的解释器（如 MSYS2 自带的 Python）。
 
 安装依赖：
@@ -108,6 +113,37 @@ py -3.13 agent_analyzer.py
 ```
 
 > 单独跑 ②③ 时同样建议带上 `PYTHONUTF8=1 PYTHONIOENCODING=utf-8`，PowerShell 则先 `$env:PYTHONUTF8="1"`。
+
+## Web 前端（FastAPI + Vue 3）
+
+提供 Web 界面：榜单浏览、电影短评详情、AI 评价报告、图表可视化，并可在网页上一键触发流水线重跑。
+
+**启动后端：**
+
+```bash
+uvicorn app:app --reload --port 8000
+```
+
+**启动前端（开发模式，另开一个终端）：**
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+然后浏览器打开 http://localhost:5173（Vite 会把 `/api` 代理到 8000）。
+
+**生产模式（单进程托管）：**
+
+```bash
+cd frontend && npm run build && cd ..
+uvicorn app:app --host 0.0.0.0 --port 8000
+```
+
+访问 http://localhost:8000 即可（FastAPI 自动托管 `frontend/dist`）。
+
+> 首次使用先跑一次流水线生成数据，或直接在网页点「运行流水线」按钮（会实时请求豆瓣，请控制频率）。
 
 ## 接入不同的 LLM
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-main.py —— 程序入口
-串联「爬取榜单 → 爬取短评 → Agent 整合分析」全流程。
+main.py —— 程序入口（CLI）
+串联「爬取榜单 → 爬取短评 → Agent 整合分析」全流程，具体逻辑见 pipeline.py。
 
 用法：
     PYTHONUTF8=1 PYTHONIOENCODING=utf-8 py -3.13 main.py
@@ -15,54 +15,28 @@ main.py —— 程序入口
 """
 
 import logging
-import os
 
-from spider import DoubanSpider
-from storage import save_csv, save_json
-from storage.data_storage import clean_movies, save_reviews_json
-from agent_analyzer import MovieAgentAnalyzer, save_report
+from pipeline import run_pipeline
 
 logger = logging.getLogger(__name__)
 
 
 def main():
-    # 1. 爬取 Top 10 榜单
-    logger.info("=== 步骤 1/4：爬取豆瓣 Top 10 ===")
-    spider = DoubanSpider(top_n=10)
-    movies = spider.fetch_top_movies()
-    if not movies:
-        raise SystemExit("❌ 爬取失败，未获取到任何电影数据，请检查网络或稍后重试。")
-    movies = clean_movies(movies)  # 统一清洗：rating→float、rating_count→int
-
-    # 2. 存储榜单 JSON + CSV
-    logger.info("=== 步骤 2/4：存储榜单数据 ===")
-    json_path = save_json(movies)
-    csv_path = save_csv(movies)
-
-    # 3. 爬取每部电影的豆瓣短评并保存
-    logger.info("=== 步骤 3/4：爬取用户短评 ===")
-    reviews = spider.fetch_movies_reviews(movies)
-    reviews_path = save_reviews_json(reviews)
-
-    # 4. Agent 整合短评 → 输出综合评价报告
-    logger.info("=== 步骤 4/4：AI Agent 整合分析 ===")
-    agent = MovieAgentAnalyzer(
-        provider=os.getenv("LLM_PROVIDER", "auto"),
-        model=os.getenv("LLM_MODEL") or os.getenv("OPENAI_MODEL"),
-        base_url=os.getenv("OPENAI_BASE_URL"),
-    )
-    report = agent.analyze()
+    result = run_pipeline(top_n=10, analyze=True)
+    paths = result["paths"]
 
     print("\n✅ 爬取 + 存储完成！")
-    print(f"   榜单 JSON：{json_path}")
-    print(f"   榜单 CSV ：{csv_path}")
-    print(f"   短评数据 ：{reviews_path}")
+    print(f"   榜单 JSONL：{paths['jsonl']}")
+    print(f"   榜单 JSON ：{paths['json']}")
+    print(f"   榜单 CSV  ：{paths['csv']}")
+    print(f"   短评数据  ：{paths['reviews']}")
 
-    if report.startswith("⚠️"):
-        print("\n" + report)
+    if paths["report"]:
+        print(f"   评价报告  ：{paths['report']}")
+    elif result["report"]:
+        print("\n" + result["report"])
     else:
-        md_path = save_report(report)
-        print(f"   评价报告 ：{md_path}")
+        print("   评价报告  ：未生成")
 
 
 if __name__ == "__main__":

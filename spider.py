@@ -17,6 +17,7 @@ spider.py —— 豆瓣电影 Top 250 爬虫模块（合并版）
     genre          类型
     quote          一句经典短评 / 简介
     rank           排名
+    poster         海报图 URL（豆瓣图床，前端用 referrerpolicy="no-referrer" 展示）
     detail_url     详情页链接
 
 反爬策略：
@@ -221,7 +222,7 @@ class DoubanSpider:
 
     def _parse_list_item(self, item):
         """解析榜单页中的一个 <li>，返回电影字段字典。"""
-        movie = {"quote": "", "original_title": "", "aliases": []}
+        movie = {"quote": "", "original_title": "", "aliases": [], "poster": ""}
 
         # 标题区：中文名（第一个 .title）+ 英文名/原名（第二个 .title）+ 别名（.other）
         title_tags = item.select(".hd .title")
@@ -234,6 +235,10 @@ class DoubanSpider:
 
         link_tag = item.select_one(".hd a")
         movie["detail_url"] = link_tag.get("href") if link_tag else ""
+
+        # 海报图：位于 <div class="pic"><a><img src="..."></a></div>
+        pic_tag = item.select_one(".pic img")
+        movie["poster"] = pic_tag.get("src") if pic_tag else ""
 
         rating_tag = item.select_one(".rating_num")
         movie["rating"] = rating_tag.get_text(strip=True) if rating_tag else ""
